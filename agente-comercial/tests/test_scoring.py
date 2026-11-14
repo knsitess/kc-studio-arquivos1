@@ -24,7 +24,21 @@ class ScoringTests(unittest.TestCase):
             "multiple_units": [dict(ev(), unit_id="u1"), dict(ev(), unit_id="u2")],
             "recent_third_party_activity": ev("b2"),
             "current_operation": ev("b1")}})
-        self.assertEqual(result["estrutura_b"], 30)
+        self.assertEqual(result["estrutura_b"], 15)
+
+    def test_pc_respects_section_caps(self):
+        result = calculate_pc({"porte": [ev("a1", 50), ev("a2", 50)],
+                               "investimento": [ev("c1", 50), ev("c2", 50)]})
+        self.assertEqual(result["porte_a"], 35)
+        self.assertEqual(result["investimento_c"], 30)
+
+    def test_ce_separates_coverage_and_quality(self):
+        facts = {"E1": ev("e1", level="official_direct"),
+                 "E2": ev("e2", level="blocked")}
+        result = calculate_ce({"facts": facts, "protocol_complete": True})
+        self.assertEqual(result["coverage_percent"], 28.6)
+        self.assertEqual(result["quality_percent"], 50.0)
+        self.assertEqual(result["ce_percent"], 14.3)
 
     def test_s3_only_adds_absence_points(self):
         self.assertEqual(calculate_od({"site_status": "S2"})["score"], 0)
