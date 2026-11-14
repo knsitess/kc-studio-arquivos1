@@ -1,0 +1,18 @@
+[project]
+name = "kc-analista-comercial"
+version = "0.1.0"
+description = "KC Studio — Analista Comercial: agente de análise de leads com o motor de pontuação da metodologia v2.5"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mistralai-agents[koyeb]>=1.1.2,<1.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
