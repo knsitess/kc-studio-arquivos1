@@ -50,10 +50,10 @@ def calculate_pc(data: dict[str, Any]) -> dict[str, Any]:
     structure = data.get("estrutura", {})
     b_items: list[dict[str, Any]] = []
     units = structure.get("multiple_units", [])
-    valid_units = [u for u in units if _valid_evidence(u)]
-    if valid_units:
-        for unit in valid_units:
-            b_items.append({**unit, "fact_id": f"B3:{unit.get('unit_id', '')}", "points": 15})
+    valid_units = [u for u in units if _valid_evidence(u) and u.get("unit_id")]
+    # B3 vale 15 no total e exige ao menos duas unidades comprovadas.
+    if len({u["unit_id"] for u in valid_units}) >= 2:
+        b_items.append({**valid_units[0], "fact_id": "B3:multiple_units", "points": 15})
     else:
         for key, points in (("recent_third_party_activity", 10), ("current_operation", 10)):
             item = structure.get(key)
@@ -111,24 +111,28 @@ def calculate_qc(data: dict[str, Any]) -> dict[str, Any]:
 def calculate_ce(data: dict[str, Any]) -> dict[str, Any]:
     facts = data.get("facts", {})
     weights = []
+    present = []
     missing_critical = []
     missing = []
     for fact in CE_FACTS:
         item = facts.get(fact)
         if not item or not _valid_evidence(item):
             weight = 0.0
+            present.append(False)
             missing.append(fact)
         else:
             level = item.get("evidence_level", "blocked")
             if level not in CE_WEIGHTS:
                 raise ValueError(f"evidence_level inválido em {fact}: {level}")
             weight = CE_WEIGHTS[level]
+            present.append(True)
         weights.append(weight)
-        if fact in CRITICAL_FACTS and weight == 0:
+        if fact in CRITICAL_FACTS and (not present[-1] or weight == 0):
             missing_critical.append(fact)
-    coverage = sum(1 for w in weights if w > 0) / 7
-    quality = sum(weights) / 7
-    ce = quality * 100
+    covered = sum(present)
+    coverage = covered / 7
+    quality = (sum(weights) / covered) if covered else 0.0
+    ce = coverage * quality * 100
     if ce >= 80:
         factor = 1.0
     elif ce >= 50:
