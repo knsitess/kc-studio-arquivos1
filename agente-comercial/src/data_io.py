@@ -23,25 +23,37 @@ def validate_payload(payload: Any) -> None:
         value = business.get(field)
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"business.{field} é obrigatório e não pode ficar vazio.")
-    if not isinstance(payload.get("pc", {}), dict):
-        raise ValueError("pc deve ser um objeto JSON.")
-    if not isinstance(payload.get("od", {}), dict):
-        raise ValueError("od deve ser um objeto JSON.")
-    if not isinstance(payload.get("qc", {}), dict):
-        raise ValueError("qc deve ser um objeto JSON.")
-    if not isinstance(payload.get("ce", {}), dict):
-        raise ValueError("ce deve ser um objeto JSON.")
+    for section in ("pc", "od", "qc", "ce"):
+        if not isinstance(payload.get(section, {}), dict):
+            raise ValueError(f"{section} deve ser um objeto JSON.")
 
 
-def _walk_evidence(value: Any):\n    """Percorre objetos/listas sem presumir que campos sejam evidência."""\n    if isinstance(value, dict):\n        if "source_url" in value or "verified_on" in value:\n            yield value\n        for child in value.values():\n            yield from _walk_evidence(child)\n    elif isinstance(value, list):\n        for child in value:\n            yield from _walk_evidence(child)\n\n\ndef build_report(payload: dict[str, Any]) -> dict[str, Any]:
+def _walk_evidence(value: Any):
+    """Percorre objetos/listas sem presumir que campos sejam evidência."""
+    if isinstance(value, dict):
+        if "source_url" in value or "verified_on" in value:
+            yield value
+        for child in value.values():
+            yield from _walk_evidence(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _walk_evidence(child)
+
+
+def build_report(payload: dict[str, Any]) -> dict[str, Any]:
     validate_payload(payload)
     evaluation = evaluate_lead({key: payload.get(key, {}) for key in ("pc", "od", "qc", "ce")})
+    has_sources = any(
+        isinstance(item, dict) and bool(item.get("source_url"))
+        for section in ("pc", "od", "qc", "ce")
+        for item in _walk_evidence(payload.get(section, {}))
+    )
     return {
         "schema_version": "1.0",
         "business": payload["business"],
         "evaluation": evaluation,
         "operational_control": {
-            "source_records_supplied": any(\n                isinstance(item, dict) and bool(item.get("source_url"))\n                for section in ("pc", "od", "qc", "ce")\n                for item in _walk_evidence(payload.get(section, {}))\n            ),
+            "source_records_supplied": has_sources,
             "human_review_required": True,
             "approach_allowed": False,
             "warning": "A pontuação não valida a veracidade das fontes. Revise cada evidência antes de qualquer decisão.",
