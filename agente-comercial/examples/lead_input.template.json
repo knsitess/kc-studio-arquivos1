@@ -1,0 +1,48 @@
+{
+  "_instrucoes": "Preencha apenas com dados reais verificados. Não use este modelo como lead real.",
+  "business": {
+    "name": "",
+    "city": "",
+    "segment": "",
+    "official_website": null,
+    "public_contact": null
+  },
+  "pc": {
+    "porte": [],
+    "estrutura": {
+      "multiple_units": [],
+      "recent_third_party_activity": null,
+      "current_operation": null
+    },
+    "investimento": []
+  },
+  "od": {
+    "site_status": "S4",
+    "completed_searches": 0,
+    "invisibility_tested": null,
+    "conversion_issue_confirmed": null,
+    "performance_measured_issue": null,
+    "redesign_confirmed": null,
+    "missing_functionality_confirmed": null,
+    "platform_page_deficiency_confirmed": null
+  },
+  "qc": {
+    "channel_type": "none",
+    "evidence": {},
+    "whatsapp_identified_by_company": false,
+    "whatsapp_evidence": {}
+  },
+  "ce": {
+    "site_status": "S4",
+    "protocol_complete": false,
+    "facts": {
+      "E1": null,
+      "E2": null,
+      "E3": null,
+      "E4": null,
+      "E5": null,
+      "E6": null,
+      "E7": null
+    }
+  }
+}
