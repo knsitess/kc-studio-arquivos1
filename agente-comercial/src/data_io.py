@@ -7,10 +7,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import date
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
 
 from scoring import evaluate_lead
 
@@ -35,7 +33,7 @@ def validate_payload(payload: Any) -> None:
         raise ValueError("ce deve ser um objeto JSON.")
 
 
-def build_report(payload: dict[str, Any]) -> dict[str, Any]:
+def _walk_evidence(value: Any):\n    """Percorre objetos/listas sem presumir que campos sejam evidência."""\n    if isinstance(value, dict):\n        if "source_url" in value or "verified_on" in value:\n            yield value\n        for child in value.values():\n            yield from _walk_evidence(child)\n    elif isinstance(value, list):\n        for child in value:\n            yield from _walk_evidence(child)\n\n\ndef build_report(payload: dict[str, Any]) -> dict[str, Any]:
     validate_payload(payload)
     evaluation = evaluate_lead({key: payload.get(key, {}) for key in ("pc", "od", "qc", "ce")})
     return {
@@ -43,7 +41,7 @@ def build_report(payload: dict[str, Any]) -> dict[str, Any]:
         "business": payload["business"],
         "evaluation": evaluation,
         "operational_control": {
-            "source_records_supplied": True,
+            "source_records_supplied": any(\n                isinstance(item, dict) and bool(item.get("source_url"))\n                for section in ("pc", "od", "qc", "ce")\n                for item in _walk_evidence(payload.get(section, {}))\n            ),
             "human_review_required": True,
             "approach_allowed": False,
             "warning": "A pontuação não valida a veracidade das fontes. Revise cada evidência antes de qualquer decisão.",
