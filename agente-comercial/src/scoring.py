@@ -44,7 +44,8 @@ def _unique_scored(items: list[dict[str, Any]]) -> tuple[int, list[str]]:
 def calculate_pc(data: dict[str, Any]) -> dict[str, Any]:
     """PC 0–100. Cada critério exige evidence com fact_id, source_url e verified_on."""
     a_items = data.get("porte", [])
-    a, a_ids = _unique_scored(a_items)
+    a_raw, a_ids = _unique_scored(a_items)
+    a = min(35, a_raw)
 
     # Estrutura: B3 tem precedência sobre B2, que tem precedência sobre B1.
     structure = data.get("estrutura", {})
@@ -60,10 +61,12 @@ def calculate_pc(data: dict[str, Any]) -> dict[str, Any]:
             if item and _valid_evidence(item):
                 b_items.append({**item, "fact_id": key, "points": points})
                 break
-    b, b_ids = _unique_scored(b_items)
+    b_raw, b_ids = _unique_scored(b_items)
+    b = min(35, b_raw)
 
     c_items = data.get("investimento", [])
-    c, c_ids = _unique_scored(c_items)
+    c_raw, c_ids = _unique_scored(c_items)
+    c = min(30, c_raw)
     raw = a + b + c
     return {"score": min(100, raw), "raw_score": raw, "porte_a": a,
             "estrutura_b": b, "investimento_c": c,
