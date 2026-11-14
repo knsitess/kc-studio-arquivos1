@@ -5,7 +5,8 @@ Agente de inteligência comercial para localizar empresas reais, verificar prese
 ## Estado do projeto
 
 - Metodologia de avaliação: v2.5 congelada.
-- Implementação: estrutura inicial.
+- Implementação: motor determinístico de pontuação criado em `src/scoring.py`; testes automatizados em `tests/test_scoring.py`.
+- Validação local dos testes: ainda pendente; executar conforme `src/README.md`.
 - Provedor de modelo, ferramenta de pesquisa e ambiente de execução: ainda a definir e validar.
 - Nenhum lead fictício deve ser criado.
 - Nenhuma mensagem deve ser enviada automaticamente.
@@ -32,9 +33,10 @@ Agente de inteligência comercial para localizar empresas reais, verificar prese
 
 1. Definir e validar o ambiente de execução e o SDK do modelo.
 2. Escolher uma fonte de pesquisa verificável e implementar coleta com registro de evidências.
-3. Implementar classificação de site, PC, OD, QC, CE e prioridade conforme a metodologia.
-4. Criar testes com casos conhecidos e dados reais fornecidos/validados.
-5. Só então conectar uma interface ou fluxo de operação.
+3. Executar e corrigir os testes locais do motor de pontuação.
+4. Implementar entrada/saída de dados e registro de evidências.
+5. Escolher fonte de pesquisa verificável e integrar coleta automatizada.
+6. Só então conectar interface ou fluxo de operação.
 
 ## Segurança de configuração
 
